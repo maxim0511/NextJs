@@ -2,10 +2,11 @@ import style from './Main.module.css'
 import Link from "next/link";
 import Image from 'next/image';
 import ImgSrc from './Header.png'
-import { useEffect, useState } from 'react';
+import {  useEffect, useState } from 'react';
 import Router from 'next/router';
 
-export function Main({children}){
+
+export function Main({children}: JSX.ElementChildrenAttribute){
     const [auth,setAuth]=useState('');
     const [activeRout,setActiveRout]=useState({pathname:''});
     useEffect(()=>{
@@ -50,6 +51,7 @@ export function Main({children}){
                     </nav>
                 </header>
                 <main>
+                    {/**@ts-expect-error */}
                     {children}
                 </main>
         </div>

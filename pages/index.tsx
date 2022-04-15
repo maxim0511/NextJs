@@ -8,9 +8,15 @@ import { useEffect, useState } from "react";
 import Preloader from "../layout/Preloader";
 import axios from "axios";
 import Router from "next/router";
+import { GetServerSideProps } from "next";
 
+type propsType = {
+    secret:string,
+    id:string,
+    error:string
+}
 
-export default function Index({secret,id,clientId,error}){
+export default function Index({secret,id,error}:propsType){
     const [preloader,setPreloader]=useState(false);
     const [accestoken,setAccessToken]=useState('');
     const [refreshtoken,setRefreshToken]=useState('');
@@ -88,10 +94,9 @@ export default function Index({secret,id,clientId,error}){
     )
 }
 
-export async function getStaticProps() {
+export const getServerSideProps:GetServerSideProps= async()=>{
     const response = await axios.post<firstEntranceType>(`http://gallery.dev.webant.ru/api/clients`,{name:'string',"allowedGrantTypes": ["password", "refresh_token"]});
     const id = response.data.id + '_' + response.data.randomId;
-    const clientId = response.data.id;
     const secret =response.data.secret;
 
     if(!response){
@@ -103,7 +108,7 @@ export async function getStaticProps() {
     }
     return {
         props:{
-            secret,id,clientId
+            secret,id
         }
     }
     
@@ -122,5 +127,4 @@ type firstEntranceType = {
 type loginType = {
     access_token:string,
     refresh_token:string,
-    error_description:string,
 }

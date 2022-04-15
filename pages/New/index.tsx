@@ -1,6 +1,7 @@
 import { Modal } from "antd";
 import 'antd/dist/antd.css'; 
 import axios, { AxiosResponse } from "axios";
+import { GetServerSideProps } from "next";
 import Head from "next/head";
 import React from "react";
 import { useState, useEffect } from "react";
@@ -9,8 +10,14 @@ import { Main } from "../../layout/Main";
 import Preloader from "../../layout/Preloader";
 import style from './new.module.css'
 
-
-export default  function New({New,Popular,limit,caching}){
+type propsType = {
+    New:boolean,
+    Popular:boolean,
+    limit:number,
+    caching:string,
+    im:ImgApiType[]
+}
+export default  function New({New,Popular,limit,caching,im}:propsType){
     const [fetching,SetFetching]=useState(true);
     const [modal,setModal] = useState(false);
     const [SrcInfo,setSrc] = useState('');
@@ -86,14 +93,16 @@ export default  function New({New,Popular,limit,caching}){
     )
 }
 
-export async function getServerSideProps(){
+export const getServerSideProps:GetServerSideProps= async()=>{
+    const initial = await axios.get(`http://gallery.dev.webant.ru/api/photos?new=true&popular=false&page=1&limit=20`);
+    const im =initial.data
     const New = true;
     const Popular = false;
     const limit = 20;
     const caching = 'ImagesNew'
     return{
         props:{
-            New,Popular,limit,caching
+            New,Popular,limit,caching,im
         }
     }
 }
