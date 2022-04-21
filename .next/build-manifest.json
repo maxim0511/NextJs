@@ -15,25 +15,10 @@
     "static/development/_middlewareManifest.js"
   ],
   "pages": {
-    "/": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/index.js"
-    ],
-    "/AddImg": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/AddImg.js"
-    ],
     "/New": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/New.js"
-    ],
-    "/Popular": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/Popular.js"
     ],
     "/_app": [
       "static/chunks/webpack.js",

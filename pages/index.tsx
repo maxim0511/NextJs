@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import Preloader from "../layout/Preloader";
 import axios from "axios";
 import Router from "next/router";
-import { GetServerSideProps } from "next";
+import {  GetStaticProps } from "next";
 
 type propsType = {
     secret:string,
@@ -94,7 +94,7 @@ export default function Index({secret,id,error}:propsType){
     )
 }
 
-export const getServerSideProps:GetServerSideProps= async()=>{
+export const getStaticProps:GetStaticProps= async()=>{
     const response = await axios.post<firstEntranceType>(`http://gallery.dev.webant.ru/api/clients`,{name:'string',"allowedGrantTypes": ["password", "refresh_token"]});
     const id = response.data.id + '_' + response.data.randomId;
     const secret =response.data.secret;
