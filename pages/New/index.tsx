@@ -28,9 +28,8 @@ export default  function New({New,Popular,limit,caching,im}:propsType){
         padding:25,
         height:700,
     }
-    const modalOpen = (event:HTMLImageElement)=>{
+    const modalOpen = (event:any)=>{
          setSrc(event.src);
-         //@ts-ignore
          setAltkey(event.key);
          setDesc(event.alt);
          setName(event.id);
@@ -72,7 +71,7 @@ export default  function New({New,Popular,limit,caching,im}:propsType){
                     <React.Fragment key={i}>
                         {element.data.map((u:ImgApiType) => (
                             <div className={style.content__item}  key={u.id} >
-                            <img src={'http://gallery.dev.webant.ru/media/' + u.image.name} id={u.name} key={u.desription} alt={u.image.name} onClick={(event) =>//@ts-ignore
+                            <img src={'http://gallery.dev.webant.ru/media/' + u.image.name} id={u.name} key={u.desription} alt={u.image.name} onClick={(event) =>
                             modalOpen(event.target)}/>
                             {/**@ts-ignore */}
                             <Modal bodyStyle={modalStyle}  centered={true} visible={modal} footer={null}  onCancel={() => setModal(false)}  width={700} > 
