@@ -6,10 +6,9 @@ import { Modal } from "antd";
 import 'antd/dist/antd.css'; 
 import axios, { AxiosResponse } from "axios";
 import { useState, useEffect } from "react";
-import { QueryClient, useInfiniteQuery, useQueryClient } from "react-query";
+import { useInfiniteQuery } from "react-query";
 import { ImgApiType } from "../New";
 import React from "react";
-import { GetServerSideProps } from "next";
 
 
 type propsType = {
@@ -17,13 +16,7 @@ type propsType = {
     Popular:boolean,
     limit:number,
     caching:string,
-    im:im
-}
-export type im = {
-    totalItems:number,
-    itemsPerPage:number,
-    data:Array<ImgApiType>,
-    countOfPages:number
+    im:ImgApiType[]
 }
 export default function Popular ({New,Popular,limit,caching,im}:propsType) {
     const [fetching,SetFetching]=useState(true);
@@ -36,9 +29,9 @@ export default function Popular ({New,Popular,limit,caching,im}:propsType) {
         padding:25,
         height:700,
     }
-    
-    const modalOpen = (event)=>{
+    const modalOpen = (event:HTMLImageElement)=>{
          setSrc(event.src);
+         //@ts-ignore
          setAltkey(event.key);
          setDesc(event.alt);
          setName(event.id);
@@ -57,31 +50,19 @@ export default function Popular ({New,Popular,limit,caching,im}:propsType) {
     }
     },[])
     const scrollHandler = (e:any )=>{
-        if(e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight)<10){
-            SetFetching(true);
-        } 
-        if (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight)>120) {
-            SetFetching(false);
+        if(e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight)<120){
+            SetFetching(true)
         }
     }    
-
-    const FetchImages= ({pageParam=1}):Promise<AxiosResponse> =>axios.get(`http://gallery.dev.webant.ru/api/photos?new=${New}&popular=${Popular}&page=${pageParam}&limit=${limit}`).then((res)=>res.data)
-    const {data,fetchNextPage,status} = useInfiniteQuery(`${caching}`,FetchImages ,
-    {
-        initialData:()=>{
-            const queryClient = useQueryClient();
-            const queryCache= queryClient.getQueryState(['ImagesPopular','initial'])?.data;
-            if (queryCache) {
-                return {
-                    pageParams:[im,1],
-                    pages:[queryCache]
-                }
-            }
-        },
+    const FetchImages= ({pageParam=1}):Promise<AxiosResponse> =>
+        axios.get(`http://gallery.dev.webant.ru/api/photos?new=${New}&popular=${Popular}&page=${pageParam}&limit=${limit}`,)
+                .then((res)=>res.data)
+    
+    const {data,fetchNextPage,status} = useInfiniteQuery(`${caching}`, async ( {pageParam=1} ) => {
+        return await FetchImages({pageParam})
+    }, {
         refetchOnWindowFocus: false,
-        enabled: false,
-        retry: false,
-        getNextPageParam: (lastPage, allPages) => allPages.length!=im.countOfPages?allPages.length+1:undefined && SetFetching(false)
+        getNextPageParam: (lastPage, allPages) => allPages.length + 1,
     }) 
     if(!data?.pages) return <Preloader/>
     if (status == 'loading' ) return <Preloader/>
@@ -95,7 +76,8 @@ export default function Popular ({New,Popular,limit,caching,im}:propsType) {
                     <React.Fragment key={i}>
                         {element.data.map((u:ImgApiType) => (
                             <div className={style.content__item}  key={u.id} >
-                            <img src={'http://gallery.dev.webant.ru/media/' + u.image.name} id={u.name} key={u.desription} alt={u.image.name} onClick={event => modalOpen(event.target)}/>
+                            <img src={'http://gallery.dev.webant.ru/media/' + u.image.name} id={u.name} key={u.desription} alt={u.image.name} onClick={(event) =>//@ts-expect-error
+                            modalOpen(event.target)}/>
                             {/**@ts-expect-error */}
                             <Modal bodyStyle={modalStyle}  centered={true} visible={modal} footer={null}  onCancel={() => setModal(false)}  width={700} > 
                                     <div className={style.container_modal_img}>
@@ -114,13 +96,14 @@ export default function Popular ({New,Popular,limit,caching,im}:propsType) {
         </Main>
     )
 }
-export const getServerSideProps:GetServerSideProps= async()=>{
-    const initial = await axios.get(`http://gallery.dev.webant.ru/api/photos?new=false&popular=true&page=1&limit=20`);
-    const im:im =initial.data
+
+export const getStaticProps= async()=>{
+    const initial = await axios.get(`http://gallery.dev.webant.ru/api/photos?new=true&popular=false&page=1&limit=20`);
+    const im =initial.data
     const New = false;
     const Popular = true;
     const limit = 20;
-    const caching = ['ImagesPopular','cache']
+    const caching = 'ImagesPopular'
     return{
         props:{
             New,Popular,limit,caching,im

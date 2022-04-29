@@ -33,3 +33,8 @@
 .error {
     color: red;
 }
+@media (max-width:400px){
+    .button {
+        margin-left: 10%;
+    }
+}

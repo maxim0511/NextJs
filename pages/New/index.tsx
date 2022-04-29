@@ -5,10 +5,9 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import React from "react";
 import { useState, useEffect } from "react";
-import { QueryClient, useInfiniteQuery, useQueryClient } from "react-query";
+import { useInfiniteQuery } from "react-query";
 import { Main } from "../../layout/Main";
 import Preloader from "../../layout/Preloader";
-import type { im } from "../Popular";
 import style from './new.module.css'
 
 type propsType = {
@@ -16,7 +15,7 @@ type propsType = {
     Popular:boolean,
     limit:number,
     caching:string,
-    im:im
+    im:ImgApiType[]
 }
 export default  function New({New,Popular,limit,caching,im}:propsType){
     const [fetching,SetFetching]=useState(true);
@@ -50,29 +49,16 @@ export default  function New({New,Popular,limit,caching,im}:propsType){
     }
     },[])
     const scrollHandler = (e:any )=>{
-        if(e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight)<10){
-            SetFetching(true);
-        } 
-        if (e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight)>120) {
-            SetFetching(false);
+        if(e.target.documentElement.scrollHeight - (e.target.documentElement.scrollTop + window.innerHeight)<120){
+            SetFetching(true)
         }
-    }   
+    }    
     const FetchImages= ({pageParam=1}):Promise<AxiosResponse> =>axios.get(`http://gallery.dev.webant.ru/api/photos?new=${New}&popular=${Popular}&page=${pageParam}&limit=${limit}`,).then((res)=>res.data);
-    const {data,fetchNextPage,status} = useInfiniteQuery(`${caching}`, FetchImages, {
-        initialData:()=>{
-            const queryClient = useQueryClient();
-            const queryCache= queryClient.getQueryState('Initial')?.data;
-            if (queryCache) {
-                return {
-                    pageParams:[im,1],
-                    pages:[queryCache]
-                }
-            }
-        },
+    const {data,fetchNextPage,status} = useInfiniteQuery(`${caching}`, async ( {pageParam=1} ) => {
+        return await FetchImages({pageParam})
+    }, {
         refetchOnWindowFocus: false,
-        enabled: false,
-        retry: false,
-        getNextPageParam: (lastPage, allPages) => allPages.length!=im.countOfPages?allPages.length+1:undefined && SetFetching(false)
+        getNextPageParam: (lastPage, allPages) => allPages.length + 1,
     }) 
     if(!data?.pages) return <Preloader/>
     if (status == 'loading' ) return (<div>LOADING...</div>)
@@ -109,7 +95,7 @@ export default  function New({New,Popular,limit,caching,im}:propsType){
 
 export const getServerSideProps:GetServerSideProps= async()=>{
     const initial = await axios.get(`http://gallery.dev.webant.ru/api/photos?new=true&popular=false&page=1&limit=20`);
-    const im:im =initial.data.data
+    const im =initial.data
     const New = true;
     const Popular = false;
     const limit = 20;

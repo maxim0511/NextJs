@@ -129,7 +129,7 @@ type E = {fileList: []} | [] | undefined
 type postImgType = {
     file:string
     name:string
-    id:number
+    id:number   
 }
 type GetNewTokenAPItype= {
     refresh_token:string,
