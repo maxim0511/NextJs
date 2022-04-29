@@ -87,7 +87,7 @@ export default function Index({secret,id,error}:propsType){
                 </Form>
                 </div><br/>
                 <div className={style.RegistrationPage}>
-                    У вас еще нет аккаунта? <br/><Link href={"/Regist"}>Зарегистрироваться</Link>
+                    У вас еще нет аккаунта?<div><Link href={"/Regist"}>Зарегистрироваться</Link></div>
                 </div>
             </div>
     </>
